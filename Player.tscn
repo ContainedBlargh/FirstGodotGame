@@ -5,22 +5,25 @@
 [ext_resource path="res://player_moving_1.png" type="Texture" id=3]
 [ext_resource path="res://player_moving_2.png" type="Texture" id=4]
 
-[sub_resource type="SpriteFrames" id=1]
-
-animations = [ {
-"frames": [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ) ],
-"loop": true,
-"name": "player",
-"speed": 5.0
-} ]
-
 [sub_resource type="CircleShape2D" id=2]
 
 custom_solver_bias = 0.0
 radius = 31.1239
 
-[node name="Player" type="Area2D" index="0"]
+[sub_resource type="SpriteFrames" id=3]
 
+animations = [ {
+"frames": [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ) ],
+"loop": false,
+"name": "default",
+"speed": 0.0
+} ]
+
+[node name="Player" type="Area2D" groups=[
+"Player",
+]]
+
+position = Vector2( 493.668, 333.925 )
 input_pickable = true
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0
@@ -29,21 +32,21 @@ angular_damp = 1.0
 audio_bus_override = false
 audio_bus_name = "Master"
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_group_": true
-}
-velocity = null
+_sections_unfolded = [ "Applied Forces", "Collision" ]
+velocity = 0.0
 
-[node name="AnimatedSprite" type="AnimatedSprite" parent="." index="0"]
-
-scale = Vector2( 2, 2 )
-frames = SubResource( 1 )
-animation = "player"
-_sections_unfolded = [ "Transform" ]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="1"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="0"]
 
 shape = SubResource( 2 )
 _sections_unfolded = [ "Material", "Transform", "Visibility", "Z Index" ]
+
+[node name="AnimatedSprite" type="AnimatedSprite" parent="." index="1"]
+
+scale = Vector2( 2, 2 )
+frames = SubResource( 3 )
+animation = "default"
+_sections_unfolded = [ "Transform" ]
+
+[connection signal="body_entered" from="." to="." method="_on_Player_body_entered"]
 
 
