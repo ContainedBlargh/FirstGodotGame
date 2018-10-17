@@ -2,16 +2,21 @@ extends Area2D
 
 signal hit
 
-export (float) var velocity = 0.0 #Current forward movement of player
+export (Vector2) var velocity = Vector2(0.0, 0.0)
+
+var power = 0.0 #Current forward movement of player
 
 const size = 40
 var screensize #Size of the screen
 
-var rotation_delta = 3.0
+const rotation_delta_constant = 3.0
+var rotation_delta = rotation_delta_constant
 var orientation = 0.0
 
-const max_velocity = 4.0
-var full_speed = false
+const max_power = 100
+const power_delta = 0.1
+
+var engines_maxed = false
 var engines_running = false
 
 var bomb_scene = preload("res://Bomb.tscn")
@@ -31,18 +36,30 @@ func turn_right():
 
 func accelerate():
 	engines_running = true
-	if velocity < max_velocity:
-		full_speed = false
-		velocity += (max_velocity) * 0.1
+	if power < max_power:
+		engines_maxed = false
+		power += (max_power) * power_delta
+		if power > max_power:
+			power = max_power
 	else:
-		full_speed = true
+		engines_maxed = true
 	
 func decelerate():
-	full_speed = false
-	if velocity > 0:
-		velocity -= max((max_velocity) * 0.1, 0.0)
+	engines_maxed = false
+	if power > 0:
+		power -= ((max_power) * power_delta)
+		if power < 0:
+			power = 0.0
 	else:
 		engines_running = false
+	pass
+
+func neutralize():
+	velocity = velocity * 0.0
+	pass
+
+func afterburner():
+	power = max_power * 2
 	pass
 
 func bomb_exploded():
@@ -66,6 +83,10 @@ func handle_input():
 		accelerate()
 	if Input.is_action_pressed("decelerate"):
 		decelerate()
+	if Input.is_action_pressed("neutralize"):
+		neutralize()
+	if Input.is_action_just_pressed("afterburner"):
+		afterburner()
 	if Input.is_action_just_released("bomb"):
 		drop_bomb()
 		
@@ -73,17 +94,18 @@ func handle_input():
 
 func modify_rotation_delta():
 	if not engines_running:
-		rotation_delta = 5.0
+		rotation_delta = rotation_delta_constant * 1.34
 	else:
-		rotation_delta = 4.0
-	if full_speed:
-		rotation_delta = 2.0
+		rotation_delta = rotation_delta_constant
+	if engines_maxed:
+		rotation_delta = rotation_delta_constant * 0.34
 
-func update_position():
+func update_position(delta):
 	var rad = deg2rad(orientation)
 	var heading = Vector2(cos(rad), sin(rad))
-	var position_modifier = heading * velocity
-	position += position_modifier
+	var position_modifier = heading * power
+	velocity = velocity.normalized() + (position_modifier * delta)
+	position += velocity
 	position.x = clamp(position.x, size, screensize.x - size)
 	position.y = clamp(position.y, size, screensize.y - size)
 	pass
@@ -95,27 +117,41 @@ func update_animation():
 	else:
 		$AnimatedSprite.set_frame(0)
 	
-	if full_speed:
+	if engines_maxed:
 		$AnimatedSprite.set_frame(2)
 	
-	if velocity < 0.6:
+	if power < 0.6:
 		engines_running = false
 		$AnimatedSprite.set_frame(0)
+
+func update_collision_shape():
+	$CollisionShape2D.rotation = deg2rad(orientation + 90.0)
+	pass
 
 func _on_Player_body_entered(body):
 	if body.is_in_group("Bombs"):
 		return
-	hide()
-	emit_signal("hit")
-	$CollisionShape2D.disabled = true
+	if body.is_in_group("Mobs"):
+		var mob = body
+		if mob.alive:
+			hide()
+			emit_signal("hit")
+			$CollisionShape2D.disabled = true
 	pass # replace with function body
+
+func start(pos):
+	position = pos
+	show()
+	$CollisionShape2D.disabled = false
 
 func _process(delta):
 	handle_input()
 	modify_rotation_delta()
-	update_position()
+	update_position(delta)
 	update_animation()
+	update_collision_shape()
 	screensize = get_viewport_rect().size
+#	print("velocity: " + str(velocity) + " power: " + str(power))
 
 func _ready():
 	screensize = get_viewport_rect().size

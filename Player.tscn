@@ -5,12 +5,13 @@
 [ext_resource path="res://player_moving_1.png" type="Texture" id=3]
 [ext_resource path="res://player_moving_2.png" type="Texture" id=4]
 
-[sub_resource type="CircleShape2D" id=2]
+[sub_resource type="CapsuleShape2D" id=3]
 
 custom_solver_bias = 0.0
-radius = 31.1239
+radius = 15.1891
+height = 21.0341
 
-[sub_resource type="SpriteFrames" id=3]
+[sub_resource type="SpriteFrames" id=2]
 
 animations = [ {
 "frames": [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ) ],
@@ -33,19 +34,24 @@ audio_bus_override = false
 audio_bus_name = "Master"
 script = ExtResource( 1 )
 _sections_unfolded = [ "Applied Forces", "Collision" ]
-velocity = 0.0
+velocity = Vector2( 0, 0 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="0"]
 
-shape = SubResource( 2 )
+shape = SubResource( 3 )
 _sections_unfolded = [ "Material", "Transform", "Visibility", "Z Index" ]
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="." index="1"]
 
-scale = Vector2( 2, 2 )
-frames = SubResource( 3 )
+frames = SubResource( 2 )
 animation = "default"
 _sections_unfolded = [ "Transform" ]
+__meta__ = {
+"_edit_group_": true
+}
 
 [connection signal="body_entered" from="." to="." method="_on_Player_body_entered"]
 

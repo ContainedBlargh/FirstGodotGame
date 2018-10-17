@@ -25,45 +25,59 @@ _sections_unfolded = [ "Resource" ]
 [sub_resource type="CircleShape2D" id=2]
 
 custom_solver_bias = 0.0
-radius = 5.11992
+radius = 5.97578
 
-[node name="Bomb" type="Area2D" index="0" groups=[
+[node name="Bomb" type="RigidBody2D" groups=[
 "Bombs",
 ]]
 
-input_pickable = true
-gravity_vec = Vector2( 0, 1 )
-gravity = 98.0
-linear_damp = 0.1
-angular_damp = 1.0
-audio_bus_override = false
-audio_bus_name = "Master"
+input_pickable = false
+collision_layer = 1
+collision_mask = 1
+mode = 0
+mass = 1.0
+friction = 1.0
+bounce = 0.0
+gravity_scale = 0.0
+custom_integrator = false
+continuous_cd = 0
+contacts_reported = 0
+contact_monitor = false
+sleeping = false
+can_sleep = true
+linear_velocity = Vector2( 0, 0 )
+linear_damp = -1.0
+angular_velocity = 0.0
+angular_damp = -1.0
 script = ExtResource( 1 )
-_sections_unfolded = [ "Transform" ]
+_sections_unfolded = [ "Collision", "Transform" ]
+exploding = false
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="." index="0"]
 
 frames = SubResource( 1 )
 animation = "default"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="1"]
-
-visible = false
-position = Vector2( -0.157776, 0 )
-shape = SubResource( 2 )
-
-[node name="Countdown" type="Timer" parent="." index="2"]
+[node name="Countdown" type="Timer" parent="." index="1"]
 
 process_mode = 0
 wait_time = 2.5
 one_shot = true
 autostart = false
 
-[node name="Exploding" type="Timer" parent="." index="3"]
+[node name="Exploding" type="Timer" parent="." index="2"]
 
 process_mode = 1
 wait_time = 0.5
 one_shot = true
 autostart = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="3"]
+
+shape = SubResource( 2 )
+
+[connection signal="timeout" from="Countdown" to="." method="explode"]
+
+[connection signal="timeout" from="Exploding" to="." method="snuff_out"]
 
 
