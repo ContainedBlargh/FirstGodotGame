@@ -4,26 +4,66 @@ export (PackedScene) var Mob
 
 signal game_over
 var score
+var mob_speed_modifier = 1.0
+
+var music = true
+var game_in_progress = false
 
 func game_over():
+	game_in_progress = false
+	if music:
+		$Tune.stop()
+		$Loop.play()
 	emit_signal("game_over")
 	$MobTimer.stop()
 	$HUD.show_game_over()
 
 func new_game():
+	game_in_progress = true
 	score = 0
 	$HUD.update_score(score)
 	$HUD.show_message("Get Ready!")
 	$Player.start($StartPosition.position)
+	if music:
+		$Fanfare.play()
+		$FanfareTimer.start()
+		$Loop.stop()
 	$StartTimer.start()
+
+func _on_FanfareTimer_timeout():
+	if music:
+		$Fanfare.stop()
+		$Tune.play()
+	pass # replace with function body
+
+func mute_music():
+	if music:
+		$Tune.stop()
+		$Fanfare.stop()
+		$Loop.stop()
+		music = false
+	else:
+		if game_in_progress:
+			$Tune.play()
+		else:
+			$Loop.play()
+		music = true
+	$HUD/Music.release_focus()
+	pass
 
 func _ready():
 	randomize()
 	OS.set_window_maximized(true)
+	$HUD/Music.connect("pressed", self, "mute_music")
 	pass
 
 func score():
 	score += 1
+	if score % 10 == 0:
+		mob_speed_modifier = (score / 10.0)
+		$Player.bomb_limit += 1
+		$Player/SprintTimer.wait_time = (score / 10.0)
+		pass
 	$HUD.update_score(score)
 
 func _on_StartTimer_timeout():
@@ -47,4 +87,5 @@ func _on_MobTimer_timeout():
 	direction += rand_range(-PI / 4, PI / 4)
 	mob.rotation = direction
 	# Choose the velocity.
-	mob.set_linear_velocity(Vector2(rand_range(mob.min_speed, mob.max_speed), 0).rotated(direction))
+	mob.set_linear_velocity(Vector2(rand_range(mob.min_speed * mob_speed_modifier, mob.max_speed * mob_speed_modifier), 0).rotated(direction))
+

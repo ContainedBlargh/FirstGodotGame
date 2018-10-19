@@ -1,11 +1,12 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Player.gd" type="Script" id=1]
 [ext_resource path="res://player.png" type="Texture" id=2]
 [ext_resource path="res://player_moving_1.png" type="Texture" id=3]
 [ext_resource path="res://player_moving_2.png" type="Texture" id=4]
+[ext_resource path="res://player_moving_3.png" type="Texture" id=5]
 
-[sub_resource type="CapsuleShape2D" id=3]
+[sub_resource type="CapsuleShape2D" id=1]
 
 custom_solver_bias = 0.0
 radius = 15.1891
@@ -14,13 +15,13 @@ height = 21.0341
 [sub_resource type="SpriteFrames" id=2]
 
 animations = [ {
-"frames": [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ) ],
+"frames": [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ), ExtResource( 5 ) ],
 "loop": false,
 "name": "default",
 "speed": 0.0
 } ]
 
-[node name="Player" type="Area2D" groups=[
+[node name="Player" type="Area2D" index="0" groups=[
 "Player",
 ]]
 
@@ -35,10 +36,11 @@ audio_bus_name = "Master"
 script = ExtResource( 1 )
 _sections_unfolded = [ "Applied Forces", "Collision" ]
 velocity = Vector2( 0, 0 )
+sprint_charge = 100
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="0"]
 
-shape = SubResource( 3 )
+shape = SubResource( 1 )
 _sections_unfolded = [ "Material", "Transform", "Visibility", "Z Index" ]
 __meta__ = {
 "_edit_group_": true
@@ -48,11 +50,22 @@ __meta__ = {
 
 frames = SubResource( 2 )
 animation = "default"
+centered = false
+offset = Vector2( -15, -25 )
 _sections_unfolded = [ "Transform" ]
 __meta__ = {
 "_edit_group_": true
 }
 
+[node name="SprintTimer" type="Timer" parent="." index="2"]
+
+process_mode = 1
+wait_time = 1.0
+one_shot = true
+autostart = false
+
 [connection signal="body_entered" from="." to="." method="_on_Player_body_entered"]
+
+[connection signal="timeout" from="SprintTimer" to="." method="_on_SprintTimer_timeout"]
 
 
